@@ -93,25 +93,32 @@ var myfunc = setInterval(function() {
 }, 1000)
 
 function isWorkTime(hrs24, mins){  
+  //console.log(`1`);  
   // case 1: start time is lesser than end time (9-18)
   if(workStartTimeHr < workEndTimeHr){
+    //console.log(`2`); 
     if(workStartTimeHr == hrs24 || workEndTimeHr == hrs24){
+      //console.log(`3`); 
       // check if minutes are in range
       if((workStartTimeHr == hrs24 && mins >= workStartTimeMin) || 
          (workEndTimeHr == hrs24 && mins <= workEndTimeMin)) {
+        //console.log(`4`); 
         return true; // WORK TIME
       }
     }
     else if(workStartTimeHr < hrs24 && hrs24 < workEndTimeHr){
+      //console.log(`5`); 
       return true; // WORK TIME
     }
     else{
+      //console.log(`6`); 
       return false; //WORK TIME OVER
     }
   }  
   
   // case 2: start time is greater than end time (21-2)
   else if(workStartTimeHr > workEndTimeHr){
+    //console.log(`7`); 
     // we have 2 comparison ranges 
     // range 1: workStartTimeHr - 23
     // range 2: 0 - workEndTimeHr
@@ -121,21 +128,24 @@ function isWorkTime(hrs24, mins){
       console.log(`8`);
        if((workStartTimeHr == hrs24 && mins >= workStartTimeMin) || 
          (workEndTimeHr == hrs24 && mins <= workEndTimeMin)) {
+         //console.log(`9`); 
         return true; // WORK TIME
        }
     }
     else if((workStartTimeHr < hrs24 && hrs24 <= 23) || // range 1
            (hrs24 >= 0 && hrs24 < workEndTimeHr)) { //range 2
+      //console.log(`10`); 
       return true; // work mode (range 1)
     }
     else {
+      //console.log(`11`); 
       return false;
     }
   }
   
   // case 3: start and end hrs are same is an invalid scenario, 
   // already handled in companion layer.
-  console.log(`12`);
+  //console.log(`12`); 
   return false;  
 };
 
@@ -147,11 +157,9 @@ clock.ontick = (evt) => {
   let mins = util.zeroPad(today.getMinutes());
   
   if(isWorkTime(hrs24, mins) == true) {
-    console.log(`WORK MODE`);
     isFoucusPeriod = true;
   }    
   else {
-    console.log(`LIFE MODE`);
     isFoucusPeriod = false;
   }
     
@@ -183,15 +191,15 @@ messaging.peerSocket.onmessage = evt => {
   
   // work time start-end
   if (evt.data.key === "workStartTime" && evt.data.newValue) {
-    let workStartTime = JSON.parse(evt.data.newValue).name;
-    workStartTimeHr = workStartTime.substr(0, 2);
-    workStartTimeMin = workStartTime.substr(3, 2);
+    let workStartTime = evt.data.newValue;
+    workStartTimeHr = workStartTime.substr(20, 2);
+    workStartTimeMin = workStartTime.substr(23, 2);
     console.log(`Work mode start time: ${workStartTimeHr}:${workStartTimeMin}`);    
   }
   if (evt.data.key === "workEndTime" && evt.data.newValue) {
-    let workEndTime = JSON.parse(evt.data.newValue).name;
-    workEndTimeHr = workEndTime.substr(0, 2);
-    workEndTimeMin = workEndTime.substr(3, 2);
+    let workEndTime = evt.data.newValue;
+    workEndTimeHr = workEndTime.substr(20, 2);
+    workEndTimeMin = workEndTime.substr(23, 2);
     console.log(`Work mode end  time: ${workEndTimeHr}:${workEndTimeMin}`);  
   }
   

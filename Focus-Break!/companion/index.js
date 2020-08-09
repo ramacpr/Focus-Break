@@ -55,12 +55,12 @@ function restoreSettings() {
 }
 
 function validateWorkHrs(){
-  let startTime = JSON.parse(settingsStorage.getItem("workStartTime")).name; 
-  let endTime = JSON.parse(settingsStorage.getItem("workEndTime")).name; 
-  let sHr = startTime.substr(0, 2); 
-  let sMin = startTime.substr(3, 2);
-  let eHr = endTime.substr(0,2);
-  let eMin = endTime.substr(3, 2);
+  let startTime = settingsStorage.getItem("workStartTime"); 
+  let endTime = settingsStorage.getItem("workEndTime"); 
+  let sHr = startTime.substr(20, 2); 
+  let sMin = startTime.substr(23, 2);
+  let eHr = endTime.substr(20,2);
+  let eMin = endTime.substr(23, 2);
   
   // the start and end time hours cannot be equal!!!
   if(sHr == eHr)
