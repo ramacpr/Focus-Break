@@ -1,0 +1,5 @@
+<svg class="background">
+  <rect id="background" /> 
+  <text id="myLabel" />
+  <text id="breakLabel"/>  
+</svg>
