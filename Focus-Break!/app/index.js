@@ -46,6 +46,7 @@ var breakTimeClr = "white";
 var isInitialized = false; 
 var FocusTimer;
 var BreakTimer;
+var vibTimer;
 
 var onPaint = setInterval(function(){
   if(isFoucusPeriod == true){
@@ -62,10 +63,15 @@ var onPaint = setInterval(function(){
   
 }, 1000);
 
-
+function OnVibTimerEllapsed(){
+  vibration.stop(); 
+  clearInterval(vibTimer);
+  console.log(`Stop Notification`);  
+}
 
 function onFocusTimerEllapsed(){
   clearInterval(FocusTimer);
+  notifyFBModeChange();
   if(isFoucusPeriod == true){
     isFocusMode = false;
     BreakTimer = setInterval(onBreakTimerEllapsed, breakTimeInSec * 1000);
@@ -75,6 +81,7 @@ function onFocusTimerEllapsed(){
 
 function onBreakTimerEllapsed(){
   clearInterval(BreakTimer);
+  notifyFBModeChange();
   if(isFoucusPeriod == true){
     isFocusMode = true;
     FocusTimer = setInterval(onFocusTimerEllapsed, workTimeInSec * 1000);
@@ -126,66 +133,67 @@ function defaultWatchFace(){
 
 function notifyFBModeChange(){
   if(isFoucusPeriod == true){
-  display.poke(); 
-  vibration.start("ring"); 
-  setTimeout(() => {vibration.stop()}, 5000);  
+    console.log(`Start Notification`);  
+    display.poke(); 
+    vibration.start("ring"); 
+    vibTimer = setInterval(OnVibTimerEllapsed, 5000);  
   }
 }
 
 function isWorkTime(hrs24, mins){  
-  console.log(`1`);  
+  //console.log(`1`);  
   // case 1: start time is lesser than end time (9-18)
   if(workStartTimeHr < workEndTimeHr){
-    console.log(`2`); 
+    //console.log(`2`); 
     if(workStartTimeHr == hrs24 || workEndTimeHr == hrs24){
-      console.log(`3`); 
+      //console.log(`3`); 
       // check if minutes are in range
       if((workStartTimeHr == hrs24 && mins >= workStartTimeMin) || 
          (workEndTimeHr == hrs24 && mins <= workEndTimeMin)) {
-        console.log(`4`); 
+        //console.log(`4`); 
         return true; // WORK TIME
       }
     }
     else if(workStartTimeHr < hrs24 && hrs24 < workEndTimeHr){
-      console.log(`5`); 
+      //console.log(`5`); 
       return true; // WORK TIME
     }
     else{
-      console.log(`6`); 
+      //console.log(`6`); 
       return false; //WORK TIME OVER
     }
   }  
   
   // case 2: start time is greater than end time (21-2)
   else if(workStartTimeHr > workEndTimeHr){
-    console.log(`7`); 
+    //console.log(`7`); 
     // we have 2 comparison ranges 
     // range 1: workStartTimeHr - 23
     // range 2: 0 - workEndTimeHr
     // if the current time is in either of the ranges it is work mode
     
     if(workStartTimeHr == hrs24 || workEndTimeHr == hrs24){ // check for minutes
-      console.log(`8`);
+      //console.log(`8`);
        if((workStartTimeHr == hrs24 && mins >= workStartTimeMin) || 
          (workEndTimeHr == hrs24 && mins <= workEndTimeMin)) {
-         console.log(`9`); 
+         //console.log(`9`); 
         return true; // WORK TIME
        }
     }
     else if((workStartTimeHr < hrs24 && hrs24 <= 23) || // range 1
            (hrs24 >= 0 && hrs24 < workEndTimeHr)) { //range 2
-      console.log(`10`); 
+      //console.log(`10`); 
       return true; // work mode (range 1)
     }
     else {
-      console.log(`11`); 
+      //console.log(`11`); 
       return false;
     }
   }
   
   // case 3: start and end hrs are same is an invalid scenario, 
   // already handled in companion layer.
-  console.log(`12`); 
+  //console.log(`12`); 
   return false;  
 };
 
@@ -197,7 +205,7 @@ clock.ontick = (evt) => {
   let mins = util.zeroPad(today.getMinutes());
   
   if(isWorkTime(hrs24, mins) == true) {
-    console.log(`focus period true`);
+    //console.log(`focus period true`);
     isFoucusPeriod = true;
     if(isInitialized == false){
       console.log(`Initializing focus timer`);
@@ -206,7 +214,7 @@ clock.ontick = (evt) => {
     }
   }    
   else {
-    console.log(`focus period false`);
+    //console.log(`focus period false`);
     forceStopTimer();
     isFoucusPeriod = false;
   }    
