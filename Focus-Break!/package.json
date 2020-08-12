@@ -5,9 +5,14 @@
     "appDisplayName": "Focus-Break!",
     "iconFile": "resources/icon.png",
     "wipeColor": "",
-    "requestedPermissions": [],
+    "requestedPermissions": [
+      "run_background"
+    ],
     "buildTargets": [
-      "mira"
+      "mira",
+      "higgs",
+      "meson",
+      "gemini"
     ],
     "i18n": {
       "en": {

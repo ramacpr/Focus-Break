@@ -12,16 +12,15 @@ clock.granularity = "seconds";
 const myLabel = document.getElementById("myLabel");
 const breakLabel = document.getElementById("breakLabel");
 let background = document.getElementById("background");
+let countdown = document.getElementById("countdown");
 
 
 // main timer variables
 var workTimeInSec = 45 * 60; 
+var focusCountDown = workTimeInSec; 
 var breakTimeInSec = 15 * 60;
-var currSecCount = 0;
-var toggle = 0;
 var isFoucusPeriod = false;
-var vibCount = 0; 
-var canVibrate = false; 
+var breakCountDown = breakTimeInSec;
 
 // time format toggle variable 
 var is12HrFormat = false;
@@ -44,81 +43,122 @@ var breakBackClr = "black";
 var focusTimeClr = "white";
 var breakTimeClr = "white";
 
-var myfunc = setInterval(function() {  
-  
-  if(isFoucusPeriod == false){
-    // set to default values and return
-    breakLabel.text = ""; 
-    background.style.fill = "black";
-    myLabel.style.fill = "white"; 
-    return;
-  }   
-  
-  // increment the counter 
-  currSecCount = currSecCount + 1;
-  vibCount = (vibCount + 1) % 5; // vibrate for 5 seconds 
-  
-  if(vibCount == 0){
-    vibration.stop();
+var isInitialized = false; 
+var FocusTimer;
+var BreakTimer;
+
+var onPaint = setInterval(function(){
+  if(isFoucusPeriod == true){
+    if(isFocusMode == true){
+      focusModeWatchFace();
+    }
+    else{
+      breakModeWatchFace();
+    }
+  }
+  else{
+    defaultWatchFace();
   }
   
-  if(currSecCount <= workTimeInSec){
+}, 1000);
+
+
+
+function onFocusTimerEllapsed(){
+  clearInterval(FocusTimer);
+  if(isFoucusPeriod == true){
+    isFocusMode = false;
+    BreakTimer = setInterval(onBreakTimerEllapsed, breakTimeInSec * 1000);
+  }
+  focusCountDown = workTimeInSec;
+}
+
+function onBreakTimerEllapsed(){
+  clearInterval(BreakTimer);
+  if(isFoucusPeriod == true){
+    isFocusMode = true;
+    FocusTimer = setInterval(onFocusTimerEllapsed, workTimeInSec * 1000);
+  }
+  breakCountDown = breakTimeInSec;
+}
+
+function InitializeFocusBreak(){
+  if(isInitialized == false){
+    FocusTimer = setInterval(onFocusTimerEllapsed, workTimeInSec * 1000);
+    isInitialized = true;
+  }  
+}
+
+function forceStopTimer(){
+  clearInterval(FocusTimer);
+  clearInterval(BreakTimer);
+}
+
+function focusModeWatchFace(){
+  if(isFoucusPeriod == true){
     breakLabel.text = focusModeMsg;
     breakLabel.style.fill = focusTxtColor;
     background.style.fill = focusBackClr;
-    myLabel.style.fill = focusTimeClr
-    if(currSecCount == 1){
-      vibCount = 0; 
-      vibration.start("ring");
-      display.poke();
-      isFocusMode = true;
-    }    
+    myLabel.style.fill = focusTimeClr; 
+    /*countdown.text = focusCountDown;
+    focusCountDown = focusCountDown - 1;*/
   }
-  else if(currSecCount >= workTimeInSec + 1 && currSecCount < workTimeInSec + breakTimeInSec + 1) {
-    breakLabel.text = breakModeMsg;
-    breakLabel.style.fill = breakTxtColor;
-    background.style.fill = breakBackClr;
-    myLabel.style.fill = breakTimeClr
-    if(currSecCount == workTimeInSec + 1){
-      vibCount = 0; 
-      vibration.start("ring");
-      display.poke();
-      isFocusMode = false;
-    }
+}
+
+function breakModeWatchFace(){
+  if(isFoucusPeriod == true){
+  breakLabel.text = breakModeMsg;
+  breakLabel.style.fill = breakTxtColor;
+  background.style.fill = breakBackClr;
+  myLabel.style.fill = breakTimeClr;
+    /*countdown.text = breakCountDown;
+    breakCountDown = breakCountDown - 1;*/
   }
-  else if(currSecCount == workTimeInSec + breakTimeInSec + 1)
-    currSecCount = 0;  
-  
-    
-}, 1000)
+}
+
+function defaultWatchFace(){
+  if(isFoucusPeriod == false){
+  breakLabel.text = ""; 
+  background.style.fill = "black";
+  myLabel.style.fill = "white"; 
+  }
+}
+
+function notifyFBModeChange(){
+  if(isFoucusPeriod == true){
+  display.poke(); 
+  vibration.start("ring"); 
+  setTimeout(() => {vibration.stop()}, 5000);  
+  }
+}
 
 function isWorkTime(hrs24, mins){  
-  //console.log(`1`);  
+  console.log(`1`);  
   // case 1: start time is lesser than end time (9-18)
   if(workStartTimeHr < workEndTimeHr){
-    //console.log(`2`); 
+    console.log(`2`); 
     if(workStartTimeHr == hrs24 || workEndTimeHr == hrs24){
-      //console.log(`3`); 
+      console.log(`3`); 
       // check if minutes are in range
       if((workStartTimeHr == hrs24 && mins >= workStartTimeMin) || 
          (workEndTimeHr == hrs24 && mins <= workEndTimeMin)) {
-        //console.log(`4`); 
+        console.log(`4`); 
         return true; // WORK TIME
       }
     }
     else if(workStartTimeHr < hrs24 && hrs24 < workEndTimeHr){
-      //console.log(`5`); 
+      console.log(`5`); 
       return true; // WORK TIME
     }
     else{
-      //console.log(`6`); 
+      console.log(`6`); 
       return false; //WORK TIME OVER
     }
   }  
   
   // case 2: start time is greater than end time (21-2)
   else if(workStartTimeHr > workEndTimeHr){
-    //console.log(`7`); 
+    console.log(`7`); 
     // we have 2 comparison ranges 
     // range 1: workStartTimeHr - 23
     // range 2: 0 - workEndTimeHr
@@ -128,41 +168,48 @@ function isWorkTime(hrs24, mins){
       console.log(`8`);
        if((workStartTimeHr == hrs24 && mins >= workStartTimeMin) || 
          (workEndTimeHr == hrs24 && mins <= workEndTimeMin)) {
-         //console.log(`9`); 
+         console.log(`9`); 
         return true; // WORK TIME
        }
     }
     else if((workStartTimeHr < hrs24 && hrs24 <= 23) || // range 1
            (hrs24 >= 0 && hrs24 < workEndTimeHr)) { //range 2
-      //console.log(`10`); 
+      console.log(`10`); 
       return true; // work mode (range 1)
     }
     else {
-      //console.log(`11`); 
+      console.log(`11`); 
       return false;
     }
   }
   
   // case 3: start and end hrs are same is an invalid scenario, 
   // already handled in companion layer.
-  //console.log(`12`); 
+  console.log(`12`); 
   return false;  
 };
 
 // Update the <text> element every tick with the current time
-clock.ontick = (evt) => {
+clock.ontick = (evt) => { 
   let today = evt.date;
   let hours = today.getHours();
   let hrs24 = util.zeroPad(hours);
   let mins = util.zeroPad(today.getMinutes());
   
   if(isWorkTime(hrs24, mins) == true) {
+    console.log(`focus period true`);
     isFoucusPeriod = true;
+    if(isInitialized == false){
+      console.log(`Initializing focus timer`);
+      InitializeFocusBreak(); 
+      isInitialized = true;
+    }
   }    
   else {
+    console.log(`focus period false`);
+    forceStopTimer();
     isFoucusPeriod = false;
-  }
-    
+  }    
   
   if (is12HrFormat == true) { // 12h format    
     hours = hours % 12 || 12;

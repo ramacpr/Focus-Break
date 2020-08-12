@@ -186,7 +186,7 @@ function mySettings(props) {
        <Section
         title={<Text bold align="center">Contact Info</Text>}>  
          <Text>Hope you are enjoying Focus-Break!</Text>
-         <Text>For any feedback, sugesstions or bug reporting please contact priyanka.ramachander@gmail.com</Text>
+         <Text>For any feedback, suggestions or bug reporting please contact priyanka.ramachander@gmail.com</Text>
     </Section>    
       
     </Page>
