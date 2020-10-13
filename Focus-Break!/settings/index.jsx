@@ -58,7 +58,11 @@ function mySettings(props) {
         <Toggle
           settingsKey="timeFormatToggle"
           label="12 Hr TimeFormat: "
-        />      
+        />  
+        <Toggle
+          settingsKey="canShowTimeOut"
+          label="Show Countdown: "
+        /> 
         <Select
           label={`Work Mode Start Time:`}
           settingsKey="workStartTime"

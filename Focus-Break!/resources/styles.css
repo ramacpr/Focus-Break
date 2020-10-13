@@ -1,6 +1,6 @@
 #myLabel {
-  font-size: 75;
-  font-family: System-Bold;
+  font-size: 100;
+  font-family: "Colfax";
   text-length: 32;
   text-anchor: middle;
   x: 50%;
@@ -9,8 +9,8 @@
 }
 
 #breakLabel {
-  font-size: 30;
-  font-family: System-Bold;
+  font-size: 28;
+  font-family: "Colfax";
   text-length: 15;
   text-anchor: middle;
   x: 50%;

@@ -8,6 +8,10 @@ import { display } from "display";
 // Update the clock every minute
 clock.granularity = "seconds";
 
+// set the below variable to true to run in test mode (for debugging) 
+var isTestMode = false; 
+var isCountDownVisible = false; 
+
 // Get a handle on the <text> element
 const myLabel = document.getElementById("myLabel");
 const breakLabel = document.getElementById("breakLabel");
@@ -44,6 +48,7 @@ var focusTimeClr = "white";
 var breakTimeClr = "white";
 
 var isInitialized = false; 
+var isTimersStopped = false; 
 var FocusTimer;
 var BreakTimer;
 var vibTimer;
@@ -58,6 +63,7 @@ var onPaint = setInterval(function(){
     }
   }
   else{
+    isFocusMode = true; // the next day when it starts, it has to start with focus mode.
     defaultWatchFace();
   }
   
@@ -91,14 +97,24 @@ function onBreakTimerEllapsed(){
 
 function InitializeFocusBreak(){
   if(isInitialized == false){
+    if(isTestMode == true){
+      workTimeInSec = 15;
+      breakTimeInSec = 5;
+    }
     FocusTimer = setInterval(onFocusTimerEllapsed, workTimeInSec * 1000);
     isInitialized = true;
   }  
 }
 
 function forceStopTimer(){
-  clearInterval(FocusTimer);
-  clearInterval(BreakTimer);
+  if(isTimersStopped == false){
+    clearInterval(FocusTimer);
+    clearInterval(BreakTimer);
+    if(isTestMode == true){
+      countdown.text = "";
+    }
+    isTimersStopped = true;
+  }  
 }
 
 function focusModeWatchFace(){
@@ -107,8 +123,14 @@ function focusModeWatchFace(){
     breakLabel.style.fill = focusTxtColor;
     background.style.fill = focusBackClr;
     myLabel.style.fill = focusTimeClr; 
-    /*countdown.text = focusCountDown;
-    focusCountDown = focusCountDown - 1;*/
+    if(isTestMode == true || isCountDownVisible == true){
+      var cdMins = util.zeroPad(parseInt(focusCountDown / 60));
+      var cdSecs = util.zeroPad(parseInt(focusCountDown % 60));
+      countdown.text = `${cdMins}:${cdSecs}`;
+    }
+    focusCountDown = focusCountDown - 1;
+    if(focusCountDown < 0)
+      focusCountDown = 0;
   }
 }
 
@@ -118,16 +140,22 @@ function breakModeWatchFace(){
   breakLabel.style.fill = breakTxtColor;
   background.style.fill = breakBackClr;
   myLabel.style.fill = breakTimeClr;
-    /*countdown.text = breakCountDown;
-    breakCountDown = breakCountDown - 1;*/
+    if(isTestMode == true || isCountDownVisible == true){
+      var cdMins = util.zeroPad(parseInt(breakCountDown / 60));
+      var cdSecs = util.zeroPad(parseInt(breakCountDown % 60));
+      countdown.text = `${cdMins}:${cdSecs}`;
+    }    
+    breakCountDown = breakCountDown - 1;
+    if(breakCountDown < 0)
+      breakCountDown = 0;
   }
 }
 
 function defaultWatchFace(){
   if(isFoucusPeriod == false){
-  breakLabel.text = ""; 
-  background.style.fill = "black";
-  myLabel.style.fill = "white"; 
+    breakLabel.text = ""; 
+    background.style.fill = "black";
+    myLabel.style.fill = "white"; 
   }
 }
 
@@ -140,60 +168,68 @@ function notifyFBModeChange(){
   }
 }
 
-function isWorkTime(hrs24, mins){  
-  //console.log(`1`);  
+var cntToggle = true;
+var theCount = (15 + 5) * 3; 
+var cntMax = theCount; 
+function isWorkTime(hrs24, mins){   
+  // in case of test mode, we test it with 15s focus and 5s break 
+  // for 3 cycles per focus mode, then life mode is also same as this period.
+  if(isTestMode == true){
+    if(cntToggle == true){
+      theCount--; 
+    if(theCount == 0)
+      cntToggle = false;
+    return true; // work mode
+    }
+    else{
+      theCount++;
+      if(theCount == cntMax)
+        cntToggle = true;
+      return false; // life mode
+    }
+  }   
+  
   // case 1: start time is lesser than end time (9-18)
   if(workStartTimeHr < workEndTimeHr){
-    //console.log(`2`); 
     if(workStartTimeHr == hrs24 || workEndTimeHr == hrs24){
-      //console.log(`3`); 
       // check if minutes are in range
       if((workStartTimeHr == hrs24 && mins >= workStartTimeMin) || 
          (workEndTimeHr == hrs24 && mins <= workEndTimeMin)) {
-        //console.log(`4`); 
         return true; // WORK TIME
       }
     }
     else if(workStartTimeHr < hrs24 && hrs24 < workEndTimeHr){
-      //console.log(`5`); 
       return true; // WORK TIME
     }
     else{
-      //console.log(`6`); 
       return false; //WORK TIME OVER
     }
   }  
   
   // case 2: start time is greater than end time (21-2)
   else if(workStartTimeHr > workEndTimeHr){
-    //console.log(`7`); 
     // we have 2 comparison ranges 
     // range 1: workStartTimeHr - 23
     // range 2: 0 - workEndTimeHr
     // if the current time is in either of the ranges it is work mode
     
     if(workStartTimeHr == hrs24 || workEndTimeHr == hrs24){ // check for minutes
-      //console.log(`8`);
        if((workStartTimeHr == hrs24 && mins >= workStartTimeMin) || 
          (workEndTimeHr == hrs24 && mins <= workEndTimeMin)) {
-         //console.log(`9`); 
         return true; // WORK TIME
        }
     }
     else if((workStartTimeHr < hrs24 && hrs24 <= 23) || // range 1
            (hrs24 >= 0 && hrs24 < workEndTimeHr)) { //range 2
-      //console.log(`10`); 
       return true; // work mode (range 1)
     }
     else {
-      //console.log(`11`); 
       return false;
     }
   }
   
   // case 3: start and end hrs are same is an invalid scenario, 
   // already handled in companion layer.
-  //console.log(`12`); 
   return false;  
 };
 
@@ -211,12 +247,14 @@ clock.ontick = (evt) => {
       console.log(`Initializing focus timer`);
       InitializeFocusBreak(); 
       isInitialized = true;
+      isTimersStopped = false; // reset for next run!
     }
   }    
   else {
-    //console.log(`focus period false`);
     forceStopTimer();
+    notifyFBModeChange();
     isFoucusPeriod = false;
+    isInitialized = false; // as we need to restart focus break timers the next day too...
   }    
   
   if (is12HrFormat == true) { // 12h format    
@@ -242,6 +280,15 @@ messaging.peerSocket.onmessage = evt => {
   if (evt.data.key === "timeFormatToggle" && evt.data.newValue) {
     is12HrFormat = JSON.parse(evt.data.newValue);
     console.log(`Time format toggle (is 12Hrs) changed to: ${is12HrFormat}`);    
+  }
+  
+  //canShowTimeOut
+  // setting received for show time out toggle
+  if (evt.data.key === "canShowTimeOut" && evt.data.newValue) {
+    isCountDownVisible = JSON.parse(evt.data.newValue);
+    if(isCountDownVisible == false)
+      countdown.text = "";
+    console.log(`canShowTimeOut toggle changed to: ${isCountDownVisible}`);    
   }
   
   // work time start-end

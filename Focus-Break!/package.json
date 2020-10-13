@@ -1,27 +1,25 @@
 {
+  "devDependencies": {
+    "@fitbit/sdk": "~4.2.0"
+  },
   "fitbit": {
     "appUUID": "98460920-a3b7-481c-8ceb-d2ed93941dfd",
     "appType": "clockface",
     "appDisplayName": "Focus-Break!",
     "iconFile": "resources/icon.png",
     "wipeColor": "",
-    "requestedPermissions": [
-      "run_background"
-    ],
+    "requestedPermissions": [],
     "buildTargets": [
       "mira",
-      "higgs",
+      "gemini",
       "meson",
-      "gemini"
+      "higgs"
     ],
     "i18n": {
-      "en": {
+      "en-US": {
         "name": "Focus-Break!"
       }
     },
     "defaultLanguage": "en-US"
-  },
-  "devDependencies": {
-    "@fitbit/sdk": "~4.1.0"
   }
 }
