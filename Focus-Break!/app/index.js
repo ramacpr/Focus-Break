@@ -72,7 +72,7 @@ var onPaint = setInterval(function(){
 function OnVibTimerEllapsed(){
   vibration.stop(); 
   clearInterval(vibTimer);
-  console.log(`Stop Notification`);  
+  //console.log(`Stop Vibration`);  
 }
 
 function onFocusTimerEllapsed(){
@@ -156,12 +156,13 @@ function defaultWatchFace(){
     breakLabel.text = ""; 
     background.style.fill = "black";
     myLabel.style.fill = "white"; 
+    countdown.text = "";
   }
 }
 
 function notifyFBModeChange(){
   if(isFoucusPeriod == true){
-    console.log(`Start Notification`);  
+    //console.log(`Start Vibration`);  
     display.poke(); 
     vibration.start("ring"); 
     vibTimer = setInterval(OnVibTimerEllapsed, 5000);  
@@ -291,11 +292,99 @@ messaging.peerSocket.onmessage = evt => {
     console.log(`canShowTimeOut toggle changed to: ${isCountDownVisible}`);    
   }
   
+  // setting received for count down text size
+  if (evt.data.key === "countdownSize" && evt.data.newValue) {
+    let countdownTextSize = evt.data.newValue;
+    let selection = countdownTextSize.substr(-3, 1);  
+    
+    if(selection === '0'){
+      countdown.style.fontSize = 20;
+      console.log('small font');
+    }
+    else if(selection === '1'){
+      countdown.style.fontSize = 30;
+      console.log('medium font');
+    }
+    else if(selection === '2'){
+      countdown.style.fontSize = 40;
+      console.log('large font');
+    }
+    else if(selection === '3'){
+      countdown.style.fontSize = 50;
+      console.log('large font');
+    }
+    else{
+      countdown.style.fontSize = 20;
+      console.log('default');
+    }
+    
+    console.log(`countdownSize changed to: ${countdownTextSize}`);    
+  }
+  
+  // setting received for time text size
+  if (evt.data.key === "timeSize" && evt.data.newValue) {
+    let timeTextSize = evt.data.newValue;
+    let selection = timeTextSize.substr(-3, 1);  
+    
+    if(selection === '0'){
+      myLabel.style.fontSize = 50;
+      console.log('small font');
+    }
+    else if(selection === '1'){
+      myLabel.style.fontSize = 70;
+      console.log('medium font');
+    }
+    else if(selection === '2'){
+      myLabel.style.fontSize = 90;
+      console.log('large font');
+    }
+    else if(selection === '3'){
+      myLabel.style.fontSize = 100;
+      console.log('large font');
+    }
+    else{
+      myLabel.style.fontSize = 100;
+      console.log('default');
+    }
+    
+    console.log(`countdownSize changed to: ${timeTextSize}`);    
+  }
+  
+  // setting received for msg text size
+  if (evt.data.key === "msgSize" && evt.data.newValue) {
+    let msgTextSize = evt.data.newValue;
+    let selection = msgTextSize.substr(-3, 1);  
+    
+    if(selection === '0'){
+      breakLabel.style.fontSize = 25;
+      console.log('small font');
+    }
+    else if(selection === '1'){
+      breakLabel.style.fontSize = 28;
+      console.log('medium font');
+    }
+    else if(selection === '2'){
+      breakLabel.style.fontSize = 30;
+      console.log('large font');
+    }
+    else if(selection === '3'){
+      breakLabel.style.fontSize = 32;
+      console.log('large font');
+    }
+    else{
+      breakLabel.style.fontSize = 28;
+      console.log('default');
+    }
+    
+    console.log(`countdownSize changed to: ${msgTextSize}`);    
+  }
+  
   // work time start-end
   if (evt.data.key === "workStartTime" && evt.data.newValue) {
     let workStartTime = evt.data.newValue;
     workStartTimeHr = workStartTime.substr(20, 2);
     workStartTimeMin = workStartTime.substr(23, 2);
+    console.log(`Work mode start time: ${workStartTime}`);  
     console.log(`Work mode start time: ${workStartTimeHr}:${workStartTimeMin}`);    
   }
   if (evt.data.key === "workEndTime" && evt.data.newValue) {

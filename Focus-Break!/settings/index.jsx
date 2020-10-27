@@ -54,15 +54,25 @@ function mySettings(props) {
     <Page>
       
       <Section
-        title={<Text bold align="center">Focus-Break! Settings</Text>}>        
+        title={<Text bold align="center">Focus-Break! Settings</Text>}>    
+      </Section>
+      
+      <Section
+        title={<Text bold align="left">Time Settings:</Text>}>   
         <Toggle
           settingsKey="timeFormatToggle"
           label="12 Hr TimeFormat: "
         />  
-        <Toggle
-          settingsKey="canShowTimeOut"
-          label="Show Countdown: "
-        /> 
+        <Select
+          label={`Text Size:`}
+          settingsKey="timeSize"
+          options={[
+              {name:"Small"},
+              {name:"Medium"},
+              {name:"Large"},
+              {name:"Extra Large"}
+            ]}
+         />  
         <Select
           label={`Work Mode Start Time:`}
           settingsKey="workStartTime"
@@ -126,25 +136,52 @@ function mySettings(props) {
          />      
       </Section>    
       
+      <Section title={<Text bold align="left">Countdown Settings:</Text>}>
+        <Toggle
+          settingsKey="canShowTimeOut"
+          label="Show Countdown: "
+          /> 
+        <Select
+          label={`Text Size:`}
+          settingsKey="countdownSize"
+          options={[
+              {name:"Small"},
+              {name:"Medium"},
+              {name:"Large"},
+              {name:"Extra Large"}
+            ]}
+         />      
+      </Section>
+      
       <Section
-        title={<Text bold align="center">Custom Focus-Break! message</Text>}>        
+        title={<Text bold align="left">Custom Focus-Break! Message:</Text>}>        
         
         <TextInput
             label="Focus Mode Text Message"
             type="text"
             settingsKey="focusText"
             maxlength = "15"
-          />
+          />        
         <TextInput
             label="Break Mode Text Message"
             type="text"
             settingsKey="breakText"
             maxlength = "15"
-          />                
+          />   
+        <Select
+          label={`Text Size:`}
+          settingsKey="msgSize"
+          options={[
+              {name:"Small"},
+              {name:"Medium"},
+              {name:"Large"},
+              {name:"Extra Large"}
+            ]}
+         />  
       </Section>   
       
       <Section
-        title={<Text bold align="center">Focus Mode Settings</Text>}>  
+        title={<Text bold align="left">Focus Mode Settings:</Text>}>  
         
         <Text>Select the background color when in focus mode:</Text>        
         <ColorSelect
@@ -166,7 +203,7 @@ function mySettings(props) {
       </Section> 
       
       <Section
-        title={<Text bold align="center">Break Mode Settings</Text>}>  
+        title={<Text bold align="left">Break Mode Settings:</Text>}>  
         
         <Text>Select the background color when in break mode:</Text>        
         <ColorSelect
